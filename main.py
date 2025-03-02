@@ -10,7 +10,7 @@ users = {
 
 @app.route("/")
 def hello():
-    return "Hello, World!"
+    return "Hello, World"
 
 # Define a REST API endpoint
 @app.route("/users/<int:user_id>", methods=["GET"])
