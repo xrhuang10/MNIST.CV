@@ -13,7 +13,7 @@ data = np.array(dataframe)
 m, n = data.shape
 np.random.shuffle(data)
 
-data_dev = data[:1000].T
+data_dev = data[0:1000].T
 Y_test = data_dev[0]
 X_test = data_dev[1: n]
 
@@ -22,10 +22,10 @@ Y_train = data_train[0]
 X_train = data_train[1: n]
 
 def initialize_parameters():
-    w1 = np.random.randn(100, 784)
-    b1 = np.random.randn(10, 1)
-    w2 = np.random.randn(10, 784)
-    b2 = np.random.randn(10, 1)
+    w1 = np.random.randn(10, 784) - 0.5
+    b1 = np.random.randn(10, 1) - 0.5
+    w2 = np.random.randn(10, 784) - 0.5
+    b2 = np.random.randn(10, 1) - 0.5
     return w1, b1, w2, b2
 
 def ReLU(z):
@@ -39,6 +39,7 @@ def forward_propagate(w1, b1, w2, b2, X):
     a1 = ReLU(z1)
     z2 = w2.dot(a1) + b2
     a2 = softmax(z2)
+    return a1, a2, z1, z2
 
 def one_hot_encode(y):
     arr = np.zeros(y.size, y.max() + 1, dtype = int)
@@ -54,7 +55,7 @@ def backward_propagate(x, y, w2, z1, z2, a1, a2):
     dz2 = a2 - encoded_y
     dw2 = 1/m * dz2.dot(a1.T)
     db2 = 1/m * np.sum(dz2, 2)
-    dz1 = w2.T.dot(dz2) * dReLU(a1)
+    dz1 = w2.T.dot(dz2) * dReLU(z1)
     dw1 = 1/m * dz1.dot(x.T)
     db1 = 1/m * np.sum(dz1, 2)
     return dw1, db1, dw2, db2
@@ -66,9 +67,22 @@ def update_params(w1, b1, w2, b2, dw1, db1, dw2, db2, alpha):
     b2 = b2 - alpha * db2
     return w1, b1, w2, b2
 
-def gradient_descent(x, y, iterations):
+def get_predictions(a2):
+    return np.argmax(a2, 0)
+
+def get_accuracy(predictions, y):
+    print(predictions, y)
+    return np.sum(predictions == y) / y.size
+
+def gradient_descent(x, y, iterations, alpha):
     w1, b1, w2, b2 = initialize_parameters()
     for i in range(iterations):
         a1, a2, z1, z2 = forward_propagate(w1, b1, w2, b2, x)
         dw1, db1, dw2, db2 = backward_propagate(x, y, w2, z1, z2, a1, a2)
         w1, b1, w2, b2 = update_params(w1, b1, w2, b2, dw1, db1, dw2, db2, alpha)
+        if i % 10 == 0:
+            print("Iteration: ", i)
+            print("Accuracy: ", get_accuracy(get_predictions(a2), y))
+    return w1, b1, w2, b2
+
+w1, b1, w2, b2 = gradient_descent(X_train, Y_train, 100, 0.1)
