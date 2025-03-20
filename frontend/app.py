@@ -1,5 +1,5 @@
 #MNIST Digit Classification
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 
 app = Flask(__name__)
 
@@ -13,8 +13,8 @@ users = {
 }
 
 @app.route("/")
-def hello():
-    return "Hello, World!"
+def homepage():
+    return render_template("index.html")
 
 # Define a REST API endpoint
 @app.route("/users/<int:user_id>", methods=["GET"])

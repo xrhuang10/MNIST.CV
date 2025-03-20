@@ -22,17 +22,19 @@ Y_train = data_train[0]
 X_train = data_train[1: n]
 
 def initialize_parameters():
-    w1 = np.random.randn(10, 784) - 0.5
-    b1 = np.random.randn(10, 1) - 0.5
-    w2 = np.random.randn(10, 784) - 0.5
-    b2 = np.random.randn(10, 1) - 0.5
+    w1 = np.random.randn(10, 784) * 0.01  # ✅ Small random values
+    b1 = np.zeros((10, 1))  # ✅ Initialize with zeros
+    w2 = np.random.randn(10, 10) * 0.01  # ✅ Correct size
+    b2 = np.zeros((10, 1))  # ✅ Initialize with zeros
     return w1, b1, w2, b2
 
 def ReLU(z):
     return np.maximum(0, z)
 
 def softmax(z):
-    return np.exp(z) / sum(np.exp(z))
+    exp_z = np.exp(z - np.max(z, axis=0, keepdims=True))  # Prevent overflow
+    return exp_z / np.sum(exp_z, axis=0, keepdims=True)  # ✅ Sum over correct axis
+
 
 def forward_propagate(w1, b1, w2, b2, X):
     z1 = w1.dot(X) + b1
@@ -42,9 +44,11 @@ def forward_propagate(w1, b1, w2, b2, X):
     return a1, a2, z1, z2
 
 def one_hot_encode(y):
-    arr = np.zeros(y.size, y.max() + 1, dtype = int)
+    arr = np.zeros((y.size, 10), dtype=int)  # Ensure (m, 10) shape
     arr[np.arange(y.size), y] = 1
-    return arr.T
+    return arr.T  # Return (10, m) for matrix compatibility
+
+
 
 def dReLU(z):
     return z > 0
@@ -54,10 +58,11 @@ def backward_propagate(x, y, w2, z1, z2, a1, a2):
     encoded_y = one_hot_encode(y)
     dz2 = a2 - encoded_y
     dw2 = 1/m * dz2.dot(a1.T)
-    db2 = 1/m * np.sum(dz2, 2)
+    db2 = 1/m * np.sum(dz2, axis=1, keepdims=True)
     dz1 = w2.T.dot(dz2) * dReLU(z1)
     dw1 = 1/m * dz1.dot(x.T)
-    db1 = 1/m * np.sum(dz1, 2)
+    db1 = 1/m * np.sum(dz1, axis=1, keepdims=True)
+
     return dw1, db1, dw2, db2
 
 def update_params(w1, b1, w2, b2, dw1, db1, dw2, db2, alpha):
@@ -85,4 +90,4 @@ def gradient_descent(x, y, iterations, alpha):
             print("Accuracy: ", get_accuracy(get_predictions(a2), y))
     return w1, b1, w2, b2
 
-w1, b1, w2, b2 = gradient_descent(X_train, Y_train, 100, 0.1)
+w1, b1, w2, b2 = gradient_descent(X_train, Y_train, 500, 0.1)

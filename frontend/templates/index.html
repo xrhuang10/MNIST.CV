@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathCam</title>
+    
+</head>
+<body>
+    <h1>MathCam</h1>
+        <button onclick="cam.start(1)">Open cam</button>
+        <div id="cam-wrapper">
+            <camera-component id="cam" />
+        </div>
+        <script>
+            const cam = document.getElementById('cam');
+            cam.addEventListener('picture', picture);
+            cam.addEventListener('backButton', backButton);
+            cam.addEventListener('webcamStop', webcamStop);
+    
+            function picture(e) {
+                console.log('picture', e.detail);
+            }
+    
+            function backButton() {
+                console.log('backButton');
+            }
+    
+            function webcamStop() {
+                console.log('webcamStop');
+            }
+        </script>
+
+</body>
+</html>
