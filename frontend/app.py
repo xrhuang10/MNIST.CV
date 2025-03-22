@@ -15,13 +15,14 @@ camera = cv2.VideoCapture(0)  # Open webcam (0 for default camera)
 def generate_frames():
     while True:
         success, frame = camera.read()  # Read a frame
+        frame = cv2.flip(frame, 1)  # Mirror the frame
         if not success:
             break
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=7, minSize=(80, 80))
 
         for (x, y, w, h) in faces:
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)  # Draw blue rectangle
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 255, 255), 2)  # Draw blue rectangle
 
         ret, buffer = cv2.imencode('.jpg', frame)  # Encode frame as JPEG
         frame = buffer.tobytes()
