@@ -1,0 +1,12 @@
+*{
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body{
+    text-align:center;
+}
+
+img{
+    border: 2px solid black;
+    margin-top: 20px;
+}
