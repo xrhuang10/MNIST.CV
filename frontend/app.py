@@ -5,6 +5,7 @@ import numpy as np
 app = Flask(__name__)
 
 face_cascade = cv2.CascadeClassifier("haarcascades/haarcascade_frontalface_default.xml")
+hand_cascade = cv2.CascadeClassifier("haarcascades/hand.xml")  # Custom hand detector
 
 
 lower_skin = np.array([0, 20, 70], dtype=np.uint8)
@@ -19,10 +20,14 @@ def generate_frames():
         if not success:
             break
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=7, minSize=(80, 80))
 
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=7, minSize=(80, 80))
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 255, 255), 2)  # Draw blue rectangle
+
+        hands = hand_cascade.detectMultiScale(gray, 1.1, 3, minSize=(50, 50))
+        for (x, y, w, h) in hands:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
         ret, buffer = cv2.imencode('.jpg', frame)  # Encode frame as JPEG
         frame = buffer.tobytes()
