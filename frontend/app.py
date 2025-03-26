@@ -6,14 +6,14 @@ app = Flask(__name__)
 
 face_cascade = cv2.CascadeClassifier("haarcascades/haarcascade_frontalface_default.xml")
 hand_cascade = cv2.CascadeClassifier("haarcascades/hand.xml")  # Custom hand detector
-
+#USE MEDIAPIPE HAND DETECTOR INSTEAD
 
 lower_skin = np.array([0, 20, 70], dtype=np.uint8)
 upper_skin = np.array([20, 255, 255], dtype=np.uint8)
 
 camera = cv2.VideoCapture(0)  # Open webcam (0 for default camera)
 
-def generate_frames():
+def camera_on():
     while True:
         success, frame = camera.read()  # Read a frame
         frame = cv2.flip(frame, 1)  # Mirror the frame
@@ -41,7 +41,7 @@ def index():
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(camera_on(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run(debug=True)
