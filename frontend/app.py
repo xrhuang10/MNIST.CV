@@ -1,11 +1,15 @@
 from flask import Flask, render_template, Response
 import cv2
 import numpy as np
+import mediapipe as mp
 
 app = Flask(__name__)
 
 face_cascade = cv2.CascadeClassifier("haarcascades/haarcascade_frontalface_default.xml")
-hand_cascade = cv2.CascadeClassifier("haarcascades/hand.xml")  # Custom hand detector
+
+mp_hands = mp.solutions.hands
+mp_drawing = mp.solutions.drawing_utils
+hands = mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 #USE MEDIAPIPE HAND DETECTOR INSTEAD
 
 lower_skin = np.array([0, 20, 70], dtype=np.uint8)
@@ -25,9 +29,15 @@ def camera_on():
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 255, 255), 2)  # Draw blue rectangle
 
-        hands = hand_cascade.detectMultiScale(gray, 1.1, 3, minSize=(50, 50))
-        for (x, y, w, h) in hands:
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # Convert BGR to RGB for MediaPipe
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        result = hands.process(rgb_frame)
+
+        # Draw hand landmarks
+        if result.multi_hand_landmarks:
+            for hand_landmarks in result.multi_hand_landmarks:
+                mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
 
         ret, buffer = cv2.imencode('.jpg', frame)  # Encode frame as JPEG
         frame = buffer.tobytes()
