@@ -10,6 +10,11 @@
 <body>
     <h1>MathCam</h1>
     <img src="{{ url_for('video_feed' )}}" width="1280" height="720">
+    <div>
+        <form action="{{ url_for('calculate') }}" method = 'POST'>
+            <button type="submit">Calculate</button>
+        </form>
+    </div>
         
         
 

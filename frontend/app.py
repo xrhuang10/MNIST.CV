@@ -17,11 +17,12 @@ upper_skin = np.array([20, 255, 255], dtype=np.uint8)
 
 camera = cv2.VideoCapture(0)  # Open webcam (0 for default camera)
 
-def camera_on():
-    global prev_x, prev_y
-    prev_x, prev_y = None, None  # Reset on app start
-    canvas = None  # Delay initialization
+prev_x, prev_y = None, None  # Reset on app start
+canvas = None  # Delay initialization
 
+def camera_on():
+    global prev_x, prev_y, canvas
+    
     while True:
         success, frame = camera.read()
         frame = cv2.flip(frame, 1)
@@ -62,10 +63,19 @@ def camera_on():
 
         combined = cv2.addWeighted(frame, 1, canvas, 0.6, 0)
 
+
         ret, buffer = cv2.imencode('.jpg', combined)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        
+
+def save_image():
+    img_path = "static/drawing.jpg"
+    cv2.imwrite(img_path, canvas)
+    print(f"Image saved to {img_path}")
+    return img_path  # Return the path for use in the frontend
+
 
 @app.route('/')
 def index():
@@ -74,6 +84,17 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     return Response(camera_on(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    img_path = save_image()
+    #return "This is the calculated page"
+    return {'image_path': img_path}
+
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
